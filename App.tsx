@@ -1,26 +1,79 @@
-import React from 'react';
-import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
+/* eslint-disable react/react-in-jsx-scope */
+import { useState } from 'react';
+import { StyleSheet, View, FlatList, Button } from 'react-native';
 
-const App = () => {
+import GoalItem from './src/components/GoalItem';
+import GoalInput from './src/components/GoalInput';
+
+export default function App() {
+  const [modalIsVisible, setModalIsVisible] = useState(false);
+  const [courseGoals, setCourseGoals] = useState([]);
+
+  function startAddGoalHandler() {
+    setModalIsVisible(true);
+  }
+
+  function endAddGoalHandler() {
+    setModalIsVisible(false);
+  }
+
+  function addGoalHandler(enteredGoalText) {
+    setCourseGoals(currentCourseGoals => [
+      ...currentCourseGoals,
+      { text: enteredGoalText, id: Math.random().toString() },
+    ]);
+    endAddGoalHandler();
+  }
+
+  function deleteGoalHandler(id) {
+    setCourseGoals(currentCourseGoals => {
+      return currentCourseGoals.filter(goal => goal.id !== id);
+    });
+  }
+
   return (
-    <SafeAreaView>
-      <View style={styles.container}>
-        <Text>Hi</Text>
+    <>
+      <View style={styles.appContainer}>
+        <Button
+          title="Add New Goal"
+          color="#a065ec"
+          onPress={startAddGoalHandler}
+        />
+        <GoalInput
+          visible={modalIsVisible}
+          onAddGoal={addGoalHandler}
+          onCancel={endAddGoalHandler}
+        />
+        <View style={styles.goalsContainer}>
+          <FlatList
+            data={courseGoals}
+            renderItem={itemData => {
+              return (
+                <GoalItem
+                  text={itemData.item.text}
+                  id={itemData.item.id}
+                  onDeleteItem={deleteGoalHandler}
+                />
+              );
+            }}
+            keyExtractor={(item, index) => {
+              return item.id;
+            }}
+            alwaysBounceVertical={false}
+          />
+        </View>
       </View>
-    </SafeAreaView>
+    </>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: {
-    margin: 16,
-    borderWidth: 2,
-    borderColor: '#14278963',
-    width: 'auto',
-    padding: 10,
-    maxWidth: 40,
-    borderRadius: 8,
+  appContainer: {
+    flex: 1,
+    paddingTop: 50,
+    paddingHorizontal: 16,
+  },
+  goalsContainer: {
+    flex: 5,
   },
 });
-
-export default App;
